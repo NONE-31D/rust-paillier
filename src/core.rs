@@ -1,4 +1,5 @@
 //! Core Paillier encryption scheme supporting ciphertext addition and plaintext multiplication.
+use std::{marker::PhantomData, time::Instant};
 
 use std::borrow::{Borrow, Cow};
 
@@ -518,8 +519,13 @@ pub fn extract_nroot(dk: &DecryptionKey, z: &BigInt) -> BigInt {
 mod tests {
 
     use super::*;
+    use std::{marker::PhantomData, time::Instant};
+    use std::io::Write;
+    use std::fs::{self, OpenOptions};
+    use std::fs::File;
 
     extern crate serde_json;
+
 
     fn test_keypair() -> Keypair {
         let p = BigInt::from_str_radix("148677972634832330983979593310074301486537017973460461278300587514468301043894574906886127642530475786889672304776052879927627556769456140664043088700743909632312483413393134504352834240399191134336344285483935856491230340093391784574980688823380828143810804684752914935441384845195613674104960646037368551517", 10).unwrap();
@@ -529,14 +535,65 @@ mod tests {
 
     #[test]
     fn test_correct_encryption_decryption() {
-        let (ek, dk) = test_keypair().keys();
+        let kp = Paillier::keypair_with_modulus_size(3072);//
+        let (ek, dk) = kp.keys();
+        // let (ek, dk) = test_keypair().keys();
+        let start_time = Instant::now();
 
-        let p = RawPlaintext::from(BigInt::from(10));
+        let p = RawPlaintext::from(BigInt::sample(768)); //::from(BigInt::from(10));
         let c = Paillier::encrypt(&ek, p.clone());
+        let end_time = Instant::now();
+        let elapsed_time = end_time.duration_since(start_time);
+        println!("enc time: {:?}", elapsed_time);
 
+        let start_time = Instant::now();
         let recovered_p = Paillier::decrypt(&dk, c);
+        let end_time = Instant::now();
+        let elapsed_time = end_time.duration_since(start_time);
+        println!("decrypt time: {:?}", elapsed_time);
+
         assert_eq!(recovered_p, p);
     }
+
+    #[test]
+    fn test_correct_total() {
+        for _ in 0..1000{
+        let mut f2 = OpenOptions::new().append(true).open("paillier_res.csv").expect("cannot open file");
+
+        let kp = Paillier::keypair_with_modulus_size(3072);//
+        let (ek, dk) = kp.keys();
+        // let (ek, dk) = test_keypair().keys();
+        let start_time = Instant::now();
+
+        let p = RawPlaintext::from(BigInt::sample(768)); //::from(BigInt::from(10));
+        let c = Paillier::encrypt(&ek, p.clone());
+        let end_time = Instant::now();
+        let elapsed_time = end_time.duration_since(start_time);
+        println!("enc time: {:?}", elapsed_time);
+        f2.write_all(format!("\n{:?},", elapsed_time.as_micros()).as_bytes()).expect("write failed");
+
+        let r = RawPlaintext::from(BigInt::sample(256)); //::from(BigInt::from(10));
+        let start_time = Instant::now();
+        let c2 = Paillier::mul(&ek, c.clone(), r.clone());
+        let end_time = Instant::now();
+        let elapsed_time = end_time.duration_since(start_time);
+        println!("smul time: {:?}", elapsed_time);
+        f2.write_all(format!("{:?},", elapsed_time.as_micros()).as_bytes()).expect("write failed");
+
+        let start_time = Instant::now();
+        let recovered_p = Paillier::decrypt(&dk, c);
+        let end_time = Instant::now();
+        let elapsed_time = end_time.duration_since(start_time);
+        println!("decrypt time: {:?}", elapsed_time);
+        f2.write_all(format!("{:?},", elapsed_time.as_micros()).as_bytes()).expect("write failed");
+
+        let recovered_p2 = Paillier::decrypt(&dk, c2);
+
+
+        assert_eq!(recovered_p, p);
+        assert_eq!(recovered_p2, RawPlaintext::from((p.0.into_owned() * r.0.into_owned()) % ek.nn));
+        }
+    } 
 
     #[test]
     fn test_correct_opening() {

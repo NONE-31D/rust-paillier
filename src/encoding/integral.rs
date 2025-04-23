@@ -320,7 +320,7 @@ mod tests {
     use curv::arithmetic::traits::*;
 
     use super::*;
-    use crate::Keypair;
+    use crate::{KeyGeneration, Keypair};
 
     fn test_keypair() -> Keypair {
         let p = BigInt::from_str_radix("148677972634832330983979593310074301486537017973460461278300587514468301043894574906886127642530475786889672304776052879927627556769456140664043088700743909632312483413393134504352834240399191134336344285483935856491230340093391784574980688823380828143810804684752914935441384845195613674104960646037368551517", 10).unwrap();
@@ -330,7 +330,10 @@ mod tests {
 
     #[test]
     fn test_scalar_encrypt_decrypt() {
+        // let kp = Paillier::keypair_with_modulus_size(3072);//
+        // let (ek, dk) = kp.keys();
         let (ek, dk) = test_keypair().keys();
+        // println!("dk_size {:?}", dk.p.bit_length());
 
         let m = 10;
         let c = Paillier::encrypt(&ek, m);

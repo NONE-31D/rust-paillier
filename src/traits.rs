@@ -14,6 +14,7 @@ pub trait KeyGeneration<KP> {
     /// Currently recommended security level is a minimum of 2048 bits.
     fn keypair_with_modulus_size(big_length: usize) -> KP;
     fn keypair_safe_primes_with_modulus_size(big_length: usize) -> KP;
+    fn keypair_precom() -> KP;
 }
 
 pub trait PrecomputeRandomness<EK, R, PR> {
