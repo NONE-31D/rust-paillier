@@ -22,6 +22,36 @@ impl KeyGeneration<Keypair> for Paillier {
         let q = BigInt::sample_safe_prime(bit_length / 2);
         Keypair { p, q }
     }
+
+
+    // p1, p2로 변환? 
+    fn keypair_blum_with_modulus_size(bit_length: usize) -> Keypair {
+        let mut p = BigInt::new();
+        let mut q = BigInt::new();
+        loop {
+            p = BigInt::sample_prime(bit_length / 2);
+            if &p % 4 != BigInt::from(3) {
+                continue;
+            }
+
+            q = BigInt::sample_prime(bit_length / 2);
+            if &q % 4 != BigInt::from(3) {
+                continue;
+            }
+            if BigInt::gcd(&p, &q) != BigInt::one() {
+                continue;
+            } // check that p and q are coprime (ensures q^-1 mod p exists)
+
+            let n = &p * &q;
+            let phi_n = (&p - BigInt::one()) * (&q - BigInt::one());
+            if BigInt::gcd(&n, &phi_n) != BigInt::one() {
+                continue; // N과 φ(N)이 서로소가 아니라면 다시 샘플링
+            }
+
+            break;
+        } // mod 4에서 3이되는 prime(p, q) 선정 -> n = pq
+        Keypair { p, q }
+    }
 }
 
 pub trait PrimeSampable {

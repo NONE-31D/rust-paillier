@@ -15,6 +15,7 @@ pub trait KeyGeneration<KP> {
     fn keypair_with_modulus_size(big_length: usize) -> KP;
     fn keypair_safe_primes_with_modulus_size(big_length: usize) -> KP;
     fn keypair_precom() -> KP;
+    fn keypair_blum_with_modulus_size(bit_length: usize) -> KP;
 }
 
 pub trait PrecomputeRandomness<EK, R, PR> {
