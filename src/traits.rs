@@ -35,7 +35,7 @@ pub trait EncryptWithChosenRandomness<EK, PT, R, CT> {
 /// Decryption of ciphertext.
 pub trait Decrypt<DK, CT, PT> {
     /// Decrypt ciphertext `c` using key `dk` into a plaintext.
-    fn decrypt(ek: &DK, c: CT) -> PT;
+    fn decrypt(dk: &DK, c: CT) -> PT;
 }
 
 /// Opening of ciphertext.

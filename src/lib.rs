@@ -63,6 +63,16 @@ pub struct DecryptionKey {
     pub q: BigInt, // second prime
 }
 
+impl DecryptionKey {
+    pub fn get_p(&self) -> &BigInt {
+        &self.p
+    }
+
+    pub fn get_q(&self) -> &BigInt {
+        &self.q
+    }
+}
+
 /// Unencrypted message without type information.
 ///
 /// Used mostly for internal purposes and advanced use-cases.

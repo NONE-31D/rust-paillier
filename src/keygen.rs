@@ -23,7 +23,6 @@ impl KeyGeneration<Keypair> for Paillier {
         Keypair { p, q }
     }
 
-
     // p1, p2로 변환? 
     fn keypair_blum_with_modulus_size(bit_length: usize) -> Keypair {
         let mut p = BigInt::new();
